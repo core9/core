@@ -1,0 +1,192 @@
+apply plugin: 'maven'
+apply plugin: 'maven-publish'
+apply plugin: 'java'
+apply plugin: 'application'
+apply plugin: 'eclipse'
+
+mainClassName = "io.core9.core.boot.BootstrapFramework"
+
+ext.buildTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss")
+version = "1.0"
+
+
+/**
+ * Publish to Jcenter (Bintray)
+ */
+buildscript {
+	repositories {
+		jcenter()
+	}
+	dependencies {
+		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
+	}
+}
+apply plugin: 'bintray'
+
+/**
+ * Source sets
+ * impl and api sources
+ */
+sourceSets {
+	api
+	impl
+}
+
+/**
+ * Configurations
+ * coreCompile are libraries available from core (other plugins), that don't need to be exported in to a distribution
+ */
+configurations {
+	coreCompile
+	apiCompile.extendsFrom compile
+	implCompile.extendsFrom compile
+}
+
+/**
+ * Export the coreCompile libs for eclipse
+ */
+eclipse.classpath.plusConfigurations += configurations.coreCompile
+
+sourceSets.impl.compileClasspath += sourceSets.api.runtimeClasspath
+
+sourceSets.all { set ->
+	if(set.name == "main") return
+	def docsTask = task("${set.name}Docs", type: Javadoc) {
+		source = set.allJava
+		classpath = set.runtimeClasspath
+		destinationDir = reporting.file("${set.name}-docs")
+	}
+	set.java.srcDirs.each { it.mkdirs() }
+	set.resources.srcDirs.each { it.mkdirs() }
+}
+
+task apiSourceJar(type: Jar) {
+	baseName = baseName + "-api"
+	from sourceSets.api.allJava
+}
+
+task apiJar(type: Jar) {
+	baseName = baseName + "-api"
+	from sourceSets.api.output
+}
+
+task implSourceJar(type: Jar) {
+	from sourceSets.api.allJava
+	from sourceSets.impl.allJava
+}
+
+task implJar(type:Jar) {
+	from sourceSets.api.output
+	from sourceSets.impl.output
+}
+
+/**
+ * Repositories for dependencies
+ */
+repositories {
+	jcenter()
+}
+
+
+/**
+ * Maven and dependency resolving
+ */
+dependencies {
+
+	compile 'org.apache.commons:commons-lang3:3.1'
+	compile 'org.apache.directory.studio:org.apache.logging.log4j:1.2.17'
+	compile 'classworlds:classworlds:+'
+
+	testCompile 'junit:junit:4.11'
+	testCompile sourceSets.api.output
+	testCompile sourceSets.impl.output
+}
+
+publishing {
+	publications {
+		api(MavenPublication) {
+			artifactId = project.name + '-api'
+			artifact apiJar
+			artifact apiSourceJar {
+				classifier "sources"
+			}
+			pom.withXml {
+				def deps = asNode().appendNode('dependencies')
+				['compile','coreCompile','apiCompile'].each { conf ->
+					configurations[conf].dependencies.each { s ->
+					def dep = deps.appendNode('dependency')
+						dep.appendNode('groupId', s.group.trim())
+						dep.appendNode('artifactId', s.name.trim())
+						dep.appendNode('version', s.version.trim())
+					}
+				}
+			}
+		}
+			
+		impl(MavenPublication) {
+			artifact implJar
+
+			artifact implSourceJar {
+				classifier "sources"
+			}
+			pom.withXml {
+				def deps = asNode().appendNode('dependencies')
+				['compile','coreCompile','implCompile'].each { conf -> 
+					configurations[conf].dependencies.each { s ->
+					def dep = deps.appendNode('dependency')
+						dep.appendNode('groupId', s.group.trim())
+						dep.appendNode('artifactId', s.name.trim())
+						dep.appendNode('version', s.version.trim())
+					}
+				}
+			}
+		}
+	}
+}
+
+/**
+ * BinTray configuration
+ */
+bintray {
+	user = 'mwienk'
+	key = '2ec8e64ada88c37cc78d508868163d97e0203318'
+	//configurations = ['coreCompile', 'apiCompile', 'implCompile']
+	publications = ['api', 'impl']
+	pkg {
+		repo = 'core9'
+		userOrg = 'core9'
+		name = 'core'
+		desc = 'The Core9 Core application'
+		licenses = ['Apache-2.0']
+		labels = ['java', 'web', 'modular', 'framework']
+	}
+	//dryrun = true
+}
+
+
+class ProjectVersion {
+	String version
+	String build
+	
+	ProjectVersion(String version, String build) {
+		this.version = version
+		this.build = build
+	}
+	
+	@Override
+	String toString() {
+		String fullVersion = "$version"
+		
+		if(build) {
+			fullVersion += ".$build"
+		} else {
+			fullVersion += "-SNAPSHOT"
+		}
+		fullVersion
+	}
+}
+
+//apply from: 'core.gradle'
+
+
+
