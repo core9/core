@@ -80,6 +80,13 @@ task implJar(type:Jar) {
 	from sourceSets.impl.output
 }
 
+artifacts {
+	archives apiSourceJar
+	archives apiJar
+	archives implSourceJar
+	archives implJar
+}
+
 /**
  * Repositories for dependencies
  */
@@ -148,9 +155,8 @@ publishing {
  * BinTray configuration
  */
 bintray {
-	user = 'mwienk'
-	key = '2ec8e64ada88c37cc78d508868163d97e0203318'
-	//configurations = ['coreCompile', 'apiCompile', 'implCompile']
+	user = bintrayUser
+	key = bintrayKey
 	publications = ['api', 'impl']
 	pkg {
 		repo = 'core9'
@@ -160,7 +166,6 @@ bintray {
 		licenses = ['Apache-2.0']
 		labels = ['java', 'web', 'modular', 'framework']
 	}
-	//dryrun = true
 }
 
 
