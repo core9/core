@@ -3,3 +3,5 @@ env:
   global:
     - secure: "hIP65YqHvWBo2kEEwukIo0fwdCNwvZJARrMaXhZFK07T2vxL5xDPB0hVousUkQnkUBehjBPa6zrdGWQkdssUvCRIVLx/Uu22jhnLdX2ZDZasqSM9iTDKKn445L9pq9eL638sVlgsseCLUTz87BXUI8AyyqCWdbOBLLsRF0czmAI="
     - secure: "dA4YNmaY8hSnCCbpFXCCWhnZDe9E3F/zYU5hVU5uuiLQb3nDtIgePQGh86TzrbhVLy5L8Yaa5we89Nrhi9f5QBwVN5FRg9e4tk0lUW/5ma3Ehg5reIYepJhLJBZiIo8dmClGxOXlvd3VGYiPVXGmp5VlZzy6ioE10WFqgRjsHeY="
+install: 
+  - "./gradlew clean test build publish"
