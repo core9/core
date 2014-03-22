@@ -188,9 +188,11 @@ repositories {
 class ProjectVersion {
 	String version
 	String build
+	String branch
 	
 	ProjectVersion(String version, String branch, String build) {
 		this.version = version
+		this.branch = branch
 		this.build = build
 	}
 	
