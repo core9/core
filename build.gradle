@@ -1,227 +1,29 @@
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
-apply plugin: 'java'
+// Core9 Framework: core
+// Build with: ./gradlew clean test build
+// Publish with  ./gradlew clean test build publish publishBintray
+
 apply plugin: 'application'
-apply plugin: 'eclipse'
-apply plugin: 'artifactory'
+apply from: 'https://raw.githubusercontent.com/core9/core9.github.io/master/buildfiles/gradle/source.gradle'
+apply from: 'https://raw.githubusercontent.com/core9/core9.github.io/master/buildfiles/gradle/publish.gradle'
+
+buildscript {
+	apply from: 'https://raw.githubusercontent.com/core9/core9.github.io/master/buildfiles/gradle/publish-build.gradle'
+}
+
+/**
+ * @TODO Somehow cannot be moved to publish.gradle
+ */
+task publishBintray (type: org._10ne.gradle.rest.RestTask, dependsOn: bintrayUpload) {
+    httpMethod = 'post'
+    uri = 'https://bintray.com/api/v1/content/core9/core9/' + project.name + '/' + project.version + '/publish'
+    username = System.env.BINTRAY_USER
+    password = System.env.BINTRAY_KEY
+}
 
 mainClassName = "io.core9.core.boot.BootstrapFramework"
 
-ext.buildTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss")
-group = "io.core9"
-version = new ProjectVersion(projectVersion, System.env.TRAVIS_BRANCH, System.env.TRAVIS_BUILD_NUMBER)
-
-/**
- * Publish to Jcenter (Bintray)
- */
-buildscript {
-	repositories {
-		jcenter()
-	}
-	dependencies {
-		classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.3'
-		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
-	}
-}
-
-/**
- * Source sets
- * impl and api sources
- */
-sourceSets {
-	api
-	impl
-}
-
-/**
- * Configurations
- * coreCompile are libraries available from core (other plugins), that don't need to be exported in to a distribution
- */
-configurations {
-	coreCompile
-	apiCompile.extendsFrom compile
-	implCompile.extendsFrom compile
-}
-
-/**
- * Export the coreCompile libs for eclipse
- */
-eclipse.classpath.plusConfigurations += configurations.coreCompile
-
-sourceSets.impl.compileClasspath += sourceSets.api.runtimeClasspath
-
-sourceSets.all { set ->
-	if(set.name == "main") return
-	def docsTask = task("${set.name}Docs", type: Javadoc) {
-		source = set.allJava
-		classpath = set.runtimeClasspath
-		destinationDir = reporting.file("${set.name}-docs")
-	}
-	set.java.srcDirs.each { it.mkdirs() }
-	set.resources.srcDirs.each { it.mkdirs() }
-}
-
-task apiSourceJar(type: Jar) {
-	baseName = baseName + "-api"
-	from sourceSets.api.allJava
-}
-
-task apiJar(type: Jar) {
-	baseName = baseName + "-api"
-	from sourceSets.api.output
-}
-
-task implSourceJar(type: Jar) {
-	from sourceSets.api.allJava
-	from sourceSets.impl.allJava
-}
-
-task implJar(type:Jar) {
-	from sourceSets.api.output
-	from sourceSets.impl.output
-}
-
-artifacts {
-	archives apiSourceJar
-	archives apiJar
-	archives implSourceJar
-	archives implJar
-}
-
-/**
- * Repositories for dependencies
- */
-repositories {
-	jcenter()
-}
-
-
-/**
- * Maven and dependency resolving
- */
 dependencies {
-
 	compile 'org.apache.commons:commons-lang3:3.1'
 	compile 'org.apache.directory.studio:org.apache.logging.log4j:1.2.17'
 	compile 'classworlds:classworlds:1.1'
-
-	testCompile 'junit:junit:4.11'
-	testCompile sourceSets.api.output
-	testCompile sourceSets.impl.output
-}
-
-publishing {
-	publications {
-		api(MavenPublication) {
-			artifactId = project.name + '-api'
-			artifact apiJar
-
-			artifact apiSourceJar {
-				classifier "sources"
-			}
-			pom.withXml {
-				def deps = asNode().appendNode('dependencies')
-				['compile','coreCompile','apiCompile'].each { conf ->
-					configurations[conf].dependencies.each { s ->
-					def dep = deps.appendNode('dependency')
-						dep.appendNode('groupId', s.group.trim())
-						dep.appendNode('artifactId', s.name.trim())
-						dep.appendNode('version', s.version.trim())
-					}
-				}
-			}
-		}
-			
-		impl(MavenPublication) {
-			artifact implJar
-
-			artifact implSourceJar {
-				classifier "sources"
-			}
-			pom.withXml {
-				def deps = asNode().appendNode('dependencies')
-				['compile','coreCompile','implCompile'].each { conf -> 
-					configurations[conf].dependencies.each { s ->
-					def dep = deps.appendNode('dependency')
-						dep.appendNode('groupId', s.group.trim())
-						dep.appendNode('artifactId', s.name.trim())
-						dep.appendNode('version', s.version.trim())
-					}
-				}
-				['testCompile'].each { conf -> 
-					configurations[conf].dependencies.each { s ->
-					if(s.group != null) {
-						def dep = deps.appendNode('dependency')
-							dep.appendNode('groupId', s.group.trim())
-							dep.appendNode('artifactId', s.name.trim())
-							dep.appendNode('version', s.version.trim())
-							dep.appendNode('scope', 'test')
-						}
-					}
-				}
-			}
-		}
-	}
-	repositories {
-		maven {
-			url new Repository(System.env.TRAVIS_BRANCH)
-			credentials {
-				username System.env.BINTRAY_USER
-				password System.env.BINTRAY_KEY
-			}
-		}
-	}
-}
-
-repositories {
-	jcenter()
-
-	maven {
-		credentials {
-			username System.env.BINTRAY_USER
-			password System.env.BINTRAY_KEY
-		}
-		url "http://oss.jfrog.org/artifactory/oss-snapshot-local"
-	}
-}
-
-class ProjectVersion {
-	String version
-	String build
-	String branch
-	
-	ProjectVersion(String version, String branch, String build) {
-		this.version = version
-		this.branch = branch
-		this.build = build
-	}
-	
-	@Override
-	String toString() {
-		String fullVersion = "$version"
-		
-		if(build && branch.equals("master")) {
-			fullVersion += ".$build"
-		} else {
-			fullVersion += "-SNAPSHOT"
-		}
-		fullVersion
-	}
-}
-
-class Repository {
-	String branch
-
-	Repository(String branch) {
-		this.branch = branch
-	}
-
-	@Override
-	String toString() {
-		String repo = "http://oss.jfrog.org/artifactory/oss-snapshot-local"
-		if(branch && branch.equals("master")) {
-			repo = "http://oss.jfrog.org/artifactory/oss-release-local"
-		}
-		repo
-	}
 }
