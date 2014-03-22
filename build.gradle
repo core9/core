@@ -3,13 +3,13 @@ apply plugin: 'maven-publish'
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'eclipse'
+apply plugin: 'artifactory'
 
 mainClassName = "io.core9.core.boot.BootstrapFramework"
 
 ext.buildTimestamp = new Date().format("yyyy-MM-dd HH:mm:ss")
 group = "io.core9"
-version = "1.0"
-
+version = new ProjectVersion(projectVersion, System.env.TRAVIS_BRANCH, System.env.TRAVIS_BUILD_NUMBER)
 
 /**
  * Publish to Jcenter (Bintray)
@@ -19,10 +19,10 @@ buildscript {
 		jcenter()
 	}
 	dependencies {
+		classpath 'org.jfrog.buildinfo:build-info-extractor-gradle:2.2.3'
 		classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:0.3'
 	}
 }
-apply plugin: 'bintray'
 
 /**
  * Source sets
@@ -115,6 +115,7 @@ publishing {
 		api(MavenPublication) {
 			artifactId = project.name + '-api'
 			artifact apiJar
+
 			artifact apiSourceJar {
 				classifier "sources"
 			}
@@ -147,34 +148,48 @@ publishing {
 						dep.appendNode('version', s.version.trim())
 					}
 				}
+				['testCompile'].each { conf -> 
+					configurations[conf].dependencies.each { s ->
+					if(s.group != null) {
+						def dep = deps.appendNode('dependency')
+							dep.appendNode('groupId', s.group.trim())
+							dep.appendNode('artifactId', s.name.trim())
+							dep.appendNode('version', s.version.trim())
+							dep.appendNode('scope', 'test')
+						}
+					}
+				}
+			}
+		}
+	}
+	repositories {
+		maven {
+			url new Repository(System.env.TRAVIS_BRANCH)
+			credentials {
+				username System.env.BINTRAY_USER
+				password System.env.BINTRAY_KEY
 			}
 		}
 	}
 }
 
-/**
- * BinTray configurations
- */
-bintray {
-	user = bintrayUser
-	key = bintrayKey
-	publications = ['api', 'impl']
-	pkg {
-		repo = 'core9'
-		userOrg = 'core9'
-		name = 'core'
-		desc = 'The Core9 Core application'
-		licenses = ['Apache-2.0']
-		labels = ['java', 'web', 'modular', 'framework']
+repositories {
+	jcenter()
+
+	maven {
+		credentials {
+			username System.env.BINTRAY_USER
+			password System.env.BINTRAY_KEY
+		}
+		url "http://oss.jfrog.org/artifactory/oss-snapshot-local"
 	}
 }
-
 
 class ProjectVersion {
 	String version
 	String build
 	
-	ProjectVersion(String version, String build) {
+	ProjectVersion(String version, String branch, String build) {
 		this.version = version
 		this.build = build
 	}
@@ -183,7 +198,7 @@ class ProjectVersion {
 	String toString() {
 		String fullVersion = "$version"
 		
-		if(build) {
+		if(build && branch.equals("master")) {
 			fullVersion += ".$build"
 		} else {
 			fullVersion += "-SNAPSHOT"
@@ -192,7 +207,19 @@ class ProjectVersion {
 	}
 }
 
-//apply from: 'core.gradle'
+class Repository {
+	String branch
 
+	Repository(String branch) {
+		this.branch = branch
+	}
 
-
+	@Override
+	String toString() {
+		String repo = "http://oss.jfrog.org/artifactory/oss-snapshot-local"
+		if(branch && branch.equals("master")) {
+			repo = "http://oss.jfrog.org/artifactory/oss-release-local"
+		}
+		repo
+	}
+}
