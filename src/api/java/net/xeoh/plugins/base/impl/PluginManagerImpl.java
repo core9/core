@@ -106,7 +106,7 @@ public class PluginManagerImpl implements PluginManager {
         this.classPathManager = new ClassPathManager(this);
         this.configuration = new PluginConfigurationImpl(initialProperties);
 
-        // Hook fundamental plugins
+        // Command fundamental plugins
         hookPlugin(new SpawnResult(this));
         hookPlugin(new SpawnResult(this.configuration));
 
