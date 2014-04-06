@@ -65,7 +65,7 @@ public class Streams {
      * @param destinationDirectory
      * @throws IOException
      */
-    @SuppressWarnings("resource")
+    //@SuppressWarnings("resource")
     public static void doUnzip(InputStream inputStream, String destinationDirectory)
                                                                                     throws IOException {
         final int BUFFER = 8 * 1024;
