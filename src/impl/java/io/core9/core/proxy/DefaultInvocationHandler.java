@@ -54,4 +54,8 @@ public class DefaultInvocationHandler implements InvocationHandler {
 	protected Object execute(Object proxy, Method method, Object[] args) throws Throwable {
 		return method.invoke(target, args);
 	}
+
+	public Object getOriginalObject() {
+		return target;
+	}
 }
