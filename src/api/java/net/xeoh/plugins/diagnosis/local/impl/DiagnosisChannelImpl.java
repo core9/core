@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.diagnosis.local.impl;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 import net.xeoh.plugins.diagnosis.local.DiagnosisChannel;
 import net.xeoh.plugins.diagnosis.local.DiagnosisChannelID;
 import net.xeoh.plugins.diagnosis.local.impl.serialization.java.Entry;
@@ -72,10 +72,10 @@ public class DiagnosisChannelImpl implements DiagnosisChannel<Object> {
         entry.value = value;
 
         // Generate stack trace if requested
-        if (this.diagnosis.useStackTraces) {
+/*        if (this.diagnosis.useStackTraces) {
             final StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
             entry.stackTrace = $(stackTrace).slice(2, Math.min(this.diagnosis.stackTracesDepth, stackTrace.length - 2)).string().array(String.class);
-        }
+        }*/
 
         // Get options 
         for (StatusOption statusOption : options) {

@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.base.impl.registry;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.jcores.jre.interfaces.functions.F1;
+//import net.jcores.jre.interfaces.functions.F1;
 import net.xeoh.plugins.base.Plugin;
 import net.xeoh.plugins.base.impl.registry.PluginClassMetaInformation.Dependency;
 import net.xeoh.plugins.base.impl.registry.PluginClassMetaInformation.PluginClassStatus;
@@ -147,11 +147,11 @@ public class PluginRegistry {
         for (Class<? extends Plugin> class1 : keySet) {
             final PluginClassMetaInformation meta = this.pluginClassMetaInformation.get(class1);
             System.out.print("    " + class1.getCanonicalName() + " (status:'" + meta.pluginClassStatus);
-            System.out.print("'; dependencies:'" + $(meta.dependencies).map(new F1<PluginClassMetaInformation.Dependency, String>() {
+/*            System.out.print("'; dependencies:'" + $(meta.dependencies).map(new F1<PluginClassMetaInformation.Dependency, String>() {
                 public String f(Dependency x) {
                     return x.pluginClass.getSimpleName();
                 }
-            }).string().join(","));
+            }).string().join(","));*/
             System.out.print("'; origin:'" + meta.pluginOrigin + "';)");
             System.out.println();
         }
