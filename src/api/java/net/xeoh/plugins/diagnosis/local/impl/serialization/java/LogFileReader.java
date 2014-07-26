@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.diagnosis.local.impl.serialization.java;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 
 import java.io.EOFException;
 import java.io.FileInputStream;
@@ -82,7 +82,7 @@ public class LogFileReader {
             @Override
             public void nextEntry(Entry entry) {
                 final long time = entry.date;
-                final String name = $(entry.channel).split("\\.").get(-1);
+                //final String name = $(entry.channel).split("\\.").get(-1);
                 String opts = "";
                 for (String string : entry.additionalInfo.keySet()) {
                     opts += ":" + string + "=" + entry.additionalInfo.get(string);
@@ -91,7 +91,7 @@ public class LogFileReader {
                 if(opts.length() > 0)
                 opts = opts.substring(1);
 
-                String output = time + "," + name + "," + entry.value + "," + opts;
+                String output = time + "," +  "," + entry.value + "," + opts;
                 if (output.contains("BrowserPluginTracer") && output.contains("callfunction/start"))
                     System.out.println(output);
             }

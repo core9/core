@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.base.impl.classpath.locator;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 
 import java.io.InputStream;
 import java.net.URI;
@@ -102,8 +102,8 @@ public abstract class AbstractClassPathLocation {
     public static AbstractClassPathLocation newClasspathLocation(JARCache cache,
                                                                  String realm,
                                                                  URI location) {
-        if ($(location).filter(".*\\.plugin[/]$").get(0) != null)
-            return new MultiPluginClasspathLocation(cache, realm, location);
+/*        if ($(location).filter(".*\\.plugin[/]$").get(0) != null)
+            return new MultiPluginClasspathLocation(cache, realm, location);*/
         if (location.toString().endsWith(".jar"))
             return new JARClasspathLocation(cache, realm, location);
 

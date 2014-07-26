@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.base.impl;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 
 
 
@@ -130,8 +130,8 @@ public class PluginManagerImpl implements PluginManager {
         }
 
         // Check if we should print a report?
-        if ($(options).get(OptionReportAfter.class, null) != null)
-            this.pluginRegistry.report();
+/*        if ($(options).get(OptionReportAfter.class, null) != null)
+            this.pluginRegistry.report();*/
 
         this.diagnosis.channel(PluginManagerTracer.class).status("add/end", new OptionInfo("url", url));
         return;
