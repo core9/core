@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.diagnosis.local.impl.serialization.java;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -57,7 +57,9 @@ public class LogFileWriter {
      */
     public LogFileWriter(String file, boolean compressOutput) {
         try {
-            this.fileOutputStream = new FileOutputStream($(file).get("diagnosis.fallback.record"));
+            //this.fileOutputStream = new FileOutputStream($(file).get("diagnosis.fallback.record"));
+        	this.fileOutputStream = new FileOutputStream(file);
+            
             if (compressOutput) {
                 this.zipStream = new GZIPOutputStream(this.fileOutputStream);
                 this.objectOutputStream = new ObjectOutputStream(this.zipStream);

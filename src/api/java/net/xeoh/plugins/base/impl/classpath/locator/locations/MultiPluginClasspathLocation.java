@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.base.impl.classpath.locator.locations;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 
 import java.io.File;
 import java.io.IOException;
@@ -69,7 +69,7 @@ public class MultiPluginClasspathLocation extends AbstractClassPathLocation {
     public MultiPluginClasspathLocation(JARCache cache, String realm, URI location) {
         super(cache, realm, location);
 
-        this.allJARs = $(location).file().dir().filter(".*jar$").string().list();
+        this.allJARs = new ArrayList<String>(); //= $(location).file().dir().filter(".*jar$").string().list();
     }
 
     /* (non-Javadoc)
@@ -85,7 +85,8 @@ public class MultiPluginClasspathLocation extends AbstractClassPathLocation {
      */
     @Override
     public URI[] getClasspathLocations() {
-        return $(this.allJARs).string().file().uri().array(URI.class);
+    	//FIXME!!!!!!!!!!!!!!!!!!
+        return null;//$(this.allJARs).string().file().uri().array(URI.class);
     }
 
     /* (non-Javadoc)

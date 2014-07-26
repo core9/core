@@ -27,7 +27,7 @@
  */
 package net.xeoh.plugins.base.impl.classpath.locator;
 
-import static net.jcores.jre.CoreKeeper.$;
+//import static net.jcores.jre.CoreKeeper.$;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -83,10 +83,10 @@ public class ClassPathLocator {
 
         // First, check if the entry represents a multi-plugin (in that case we don't add
         // anything else)
-        if ($(startPoint).filter(".*\\.plugin?$").get(0) != null) {
+/*        if ($(startPoint).filter(".*\\.plugin?$").get(0) != null) {
             rval.add(AbstractClassPathLocation.newClasspathLocation(this.cache, toplevel.toString(), toplevel));
             return rval;
-        }
+        }*/
 
         // Check if this is a directory or a file
         if (startPoint.isDirectory()) {
@@ -100,10 +100,10 @@ public class ClassPathLocator {
                     hasJARs = true;
                 }
 
-                if ($(file).filter(".*\\.plugin?$").get(0) != null) {
+/*                if ($(file).filter(".*\\.plugin?$").get(0) != null) {
                     rval.add(AbstractClassPathLocation.newClasspathLocation(this.cache, file.toURI().toString(), file.toURI()));
                     hasJARs = true;
-                }
+                }*/
             }
 
             // If we have JARs, we already added them
